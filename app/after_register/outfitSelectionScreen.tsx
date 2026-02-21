@@ -76,7 +76,7 @@ const OutfitSelectionScreen = () => {
     const fetchClothes = async () => {
         try {
             const userId = await AsyncStorage.getItem('userId');
-            const response = await fetch(`http://${config.serverIP}:3000/api/images?userId=${userId}`);
+            const response = await fetch(`http://${config.serverIP}/api/images?userId=${userId}`);
             if (!response.ok) throw new Error('衣類の取得に失敗しました');
             const data = await response.json();
             setClothes(data);
@@ -124,7 +124,7 @@ const OutfitSelectionScreen = () => {
 
             const today = new Date().toISOString().split('T')[0];
 
-            const checkResponse = await fetch(`http://${config.serverIP}:3000/api/check-outfit`, {
+            const checkResponse = await fetch(`http://${config.serverIP}/api/check-outfit`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -146,7 +146,7 @@ const OutfitSelectionScreen = () => {
             } else {
                 const createNewOutfit = async (userId: string) => {
                     try {
-                        const response = await fetch(`http://${config.serverIP}:3000/api/register-outfit`, {
+                        const response = await fetch(`http://${config.serverIP}/api/register-outfit`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -181,7 +181,7 @@ const OutfitSelectionScreen = () => {
     // 更新用の関数
     const updateOutfit = async (userId: string, outfitId: string) => {
         try {
-            const response = await fetch(`http://${config.serverIP}:3000/api/update-outfit/${outfitId}`, {
+            const response = await fetch(`http://${config.serverIP}/api/update-outfit/${outfitId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -216,7 +216,7 @@ const OutfitSelectionScreen = () => {
         if (item.imageUrl) {
             const fullUrl = item.imageUrl.startsWith('http') 
                 ? item.imageUrl 
-                : `http://${config.serverIP}:3000${item.imageUrl}`;
+                : `http://${config.serverIP}${item.imageUrl}`;
             
             useEffect(() => {
                 setImageUrls(prev => ({
@@ -243,7 +243,7 @@ const OutfitSelectionScreen = () => {
                 if (item.imageUrl) {
                     const fullUrl = item.imageUrl.startsWith('http')
                         ? item.imageUrl
-                        : `http://${config.serverIP}:3000${item.imageUrl}`;
+                        : `http://${config.serverIP}${item.imageUrl}`;
                     newImageUrls[item.id] = fullUrl;
                 }
             });

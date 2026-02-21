@@ -93,7 +93,7 @@ const Register = ({ navigation }: Props) => {
 
   // 3. 重複チェック（サーバー通信）
   try {
-    const response = await fetch(`http://${config.serverIP}:3000/api/check-email`, {
+    const response = await fetch(`http://${config.serverIP}/api/check-email`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: trimmedText }),
@@ -148,7 +148,7 @@ const Register = ({ navigation }: Props) => {
     setIsLoading(true); // ローディング開始
 
     try {
-      const response = await fetch(`http://${config.serverIP}:3000/api/register`, {
+      const response = await fetch(`http://${config.serverIP}/api/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

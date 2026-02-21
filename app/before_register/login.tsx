@@ -76,7 +76,7 @@ const Login = ({ navigation }: Props) => {
 
     const handleLogin = async () => {
       try {
-        const response = await fetch(`http://${config.serverIP}:3000/api/login`, {
+        const response = await fetch(`http://${config.serverIP}/api/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
