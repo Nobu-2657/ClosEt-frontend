@@ -1,3 +1,3 @@
 export default {
-    serverIP: '192.168.10.103',
+    serverIP: 'https://closet-api-1fo7.onrender.com',
 };
