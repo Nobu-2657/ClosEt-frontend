@@ -8,7 +8,11 @@ const ENV = {
 };
 
 // 2. ★ここで「今いる場所」を1つだけ指定する（ここだけ書き換えればOK！）
-const CURRENT_LOCAL = 'home'; // 'home' か 'univ' にする
+// ▼ バックエンドもローカルで開発・テストする時
+const CURRENT_LOCAL = 'home'; // または 'univ'
+
+// ▼ アプリの画面だけ開発し、データはRender（本番）と通信させたい時
+// const CURRENT_LOCAL = 'prod';
 
 // 3. 自動切り替えのロジック
 const config = {
