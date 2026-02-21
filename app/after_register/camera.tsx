@@ -119,7 +119,7 @@ const CameraScreen: React.FC = () => {
                 formData.append('temperature', temperature.toString());
 
                 // URLは合っているのでそのまま
-                const response = await fetch(`http://${config.serverIP}/api/upload`, {
+                const response = await fetch(`${config.serverIP}/api/upload`, {
                     method: 'POST',
                     body: formData,
                     // ★重要: multipart/form-dataの場合、Content-Typeヘッダーは

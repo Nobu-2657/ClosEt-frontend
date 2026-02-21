@@ -40,7 +40,7 @@ const FeedbackScreen = () => {
         if (item.imageUrl) {
             const fullUrl = item.imageUrl.startsWith('http') 
                 ? item.imageUrl 
-                : `http://${config.serverIP}:3001${item.imageUrl}`;
+                : `${config.serverIP}:3001${item.imageUrl}`;
             return { uri: fullUrl };
         } else if (item.base64) {
             return { uri: `data:image/jpeg;base64,${item.base64}` };
@@ -63,7 +63,7 @@ const FeedbackScreen = () => {
         try {
             const userId = await AsyncStorage.getItem('userId');
             // ★修正：new Date()に戻しました（現在時刻で送信）
-            const response = await fetch(`http://${config.serverIP}:3001/api/submit-feedback`, {
+            const response = await fetch(`${config.serverIP}:3001/api/submit-feedback`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId, feedback, date: new Date() }),
@@ -84,7 +84,7 @@ const FeedbackScreen = () => {
             const today = new Date().toISOString().split('T')[0];
             
             const dailyInfoResponse = await fetch(
-                `http://${config.serverIP}:3001/api/daily-info?userId=${userId}&date=${today}`
+                `${config.serverIP}:3001/api/daily-info?userId=${userId}&date=${today}`
             );
             
             if (!dailyInfoResponse.ok) throw new Error('日付の服の取得に失敗しました');
@@ -93,7 +93,7 @@ const FeedbackScreen = () => {
             
             if (dailyInfo && dailyInfo.clothesIds) {
                 const clothesResponse = await fetch(
-                    `http://${config.serverIP}:3001/api/clothes-by-ids`,
+                    `${config.serverIP}:3001/api/clothes-by-ids`,
                     {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },

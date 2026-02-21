@@ -73,7 +73,7 @@ const ClosetScreen = () => {
 
     const fetchClothes = async (userId: string): Promise<ClothingItem[]> => {
         try {
-            const response = await fetch(`http://${config.serverIP}/api/images?userId=${userId}`);
+            const response = await fetch(`${config.serverIP}/api/images?userId=${userId}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -223,7 +223,7 @@ const ClosetScreen = () => {
         if (item.imageUrl) {
             const fullUrl = item.imageUrl.startsWith('http') 
                 ? item.imageUrl 
-                : `http://${config.serverIP}${item.imageUrl}`;
+                : `${config.serverIP}${item.imageUrl}`;
             return { uri: fullUrl };
         } else if (item.base64) {
             return { uri: `data:image/jpeg;base64,${item.base64}` };
@@ -273,7 +273,7 @@ const ClosetScreen = () => {
 
             if (selectedItem && userId) {
                 try {
-                    const response = await fetch(`http://${config.serverIP}/api/update`, {
+                    const response = await fetch(`${config.serverIP}/api/update`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -299,7 +299,7 @@ const ClosetScreen = () => {
         const deleteItem = async () => {
             if (selectedItem && userId) {
                 try {
-                    const response = await fetch(`http://${config.serverIP}/api/delete`, {
+                    const response = await fetch(`${config.serverIP}/api/delete`, {
                         method: 'DELETE',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
