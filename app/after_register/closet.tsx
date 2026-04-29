@@ -6,6 +6,7 @@ import config from '@/config';
 import CustomButton from './customButton';
 import { Picker } from '@react-native-picker/picker';
 import Slider from '@react-native-community/slider';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 
@@ -49,6 +50,14 @@ const ClosetScreen = () => {
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [selectedTemperatures, setSelectedTemperatures] = useState<string[]>([]);
     const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
+    const [category, setCategory] = useState('');
+
+    // ★ 追加：画面にフォーカスが当たるたびに、選択状態（selectedItem）を空に戻す
+    useFocusEffect(
+        useCallback(() => {
+            setSelectedItem(null);
+        }, [])
+    );
 
     useEffect(() => {
         const fetchUserId = async () => {
@@ -135,40 +144,58 @@ const ClosetScreen = () => {
     );
 
     const FilterModal = () => (
-        <Modal visible={showFilterModal} transparent={true} animationType="fade" onRequestClose={() => setShowFilterModal(false)}>
-            <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowFilterModal(false)}>
-                <View style={styles.modalContent}>
+    <Modal visible={showFilterModal} transparent={true} animationType="fade" onRequestClose={() => setShowFilterModal(false)}>
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowFilterModal(false)}>
+            {/* モーダルの中身をクリックした時は閉じないようにする */}
+            <TouchableOpacity activeOpacity={1} style={styles.modalContent}>
+                
+                {/* 項目が多いのでスクロール可能にする */}
+                <ScrollView showsVerticalScrollIndicator={false}>
                     <Text style={styles.modalTitle}>カテゴリ</Text>
-                    {['outerwear', 'tops', 'pants', 'skirt', 'onepiece', 'other'].map((category) => (
-                        <TouchableOpacity key={category} style={styles.checkboxContainer} onPress={() => toggleCategory(category)}>
-                            <View style={[styles.checkbox, selectedCategories.includes(category) && styles.checked]}>
-                                {selectedCategories.includes(category) && (
-                                    <Ionicons name="checkmark" size={16} color="white" />
-                                )}
-                            </View>
-                            <Text style={styles.checkboxLabel}>{categoryMap[category] || category}</Text>
-                        </TouchableOpacity>
-                    ))}
+                    <View style={styles.chipContainer}>
+                        {['outerwear', 'tops', 'pants', 'skirt', 'onepiece', 'other'].map((category) => (
+                            <TouchableOpacity 
+                                key={category} 
+                                style={[styles.chip, selectedCategories.includes(category) && styles.chipSelected]} 
+                                onPress={() => toggleCategory(category)}
+                            >
+                                <Text style={[styles.chipText, selectedCategories.includes(category) && styles.chipTextSelected]}>
+                                    {categoryMap[category] || category}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+
                     <Text style={styles.modalTitle}>温度</Text>
-                    {['-10~-5', '-5~0', '0~5', '5~10', '10~15', '15~20', '20~25', '25~30', '30~35', '35~40'].map((temp) => (
-                        <TouchableOpacity key={temp} style={styles.checkboxContainer} onPress={() => toggleTemperature(temp)}>
-                            <View style={[styles.checkbox, selectedTemperatures.includes(temp) && styles.checked]}>
-                                {selectedTemperatures.includes(temp) && (
-                                    <Ionicons name="checkmark" size={16} color="white" />
-                                )}
-                            </View>
-                            <Text style={styles.checkboxLabel}>{`${temp}℃`}</Text>
-                        </TouchableOpacity>
-                    ))}
-                    <View style={styles.buttonContainer}>
+                    <View style={styles.chipContainer}>
+                        {['-10~-5', '-5~0', '0~5', '5~10', '10~15', '15~20', '20~25', '25~30', '30~35', '35~40'].map((temp) => (
+                            <TouchableOpacity 
+                                key={temp} 
+                                style={[styles.chip, selectedTemperatures.includes(temp) && styles.chipSelected]} 
+                                onPress={() => toggleTemperature(temp)}
+                            >
+                                <Text style={[styles.chipText, selectedTemperatures.includes(temp) && styles.chipTextSelected]}>
+                                    {`${temp}℃`}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </ScrollView>
+
+                {/* ボタンを画面下部に固定し、はみ出さないようにflex:1で均等割り */}
+                <View style={styles.buttonContainer}>
+                    <View style={styles.actionButton}>
                         <CustomButton title="リセット" onPress={resetFilters} whiteBackground={true} />
-                        <View style={styles.buttonSpacer} />
+                    </View>
+                    <View style={styles.buttonSpacer} />
+                    <View style={styles.actionButton}>
                         <CustomButton title="適用" onPress={applyFilters} />
                     </View>
                 </View>
             </TouchableOpacity>
-        </Modal>
-    );
+        </TouchableOpacity>
+    </Modal>
+);
 
     const toggleCategory = (category: string) => {
         setSelectedCategories(prev =>
@@ -337,6 +364,7 @@ const ClosetScreen = () => {
                 <TextInput
                     style={styles.input}
                     placeholder="名称"
+                    placeholderTextColor="#888888"
                     value={editName}
                     onChangeText={setEditName}
                 />
@@ -362,18 +390,21 @@ const ClosetScreen = () => {
                 <Ionicons name="sunny-outline" size={24} color="black" />
             </View>
             <View style={styles.editPickerContainer}>
-                <Picker
-                    selectedValue={editCategory}
-                    style={styles.editPicker}
-                    onValueChange={(itemValue: string) => setEditCategory(itemValue)}
+                <Picker 
+                    mode="dropdown"
+                    selectedValue={editCategory} 
+                    style={[styles.picker, { color: 'black' }]} 
+                    onValueChange={(v) => setEditCategory(v)}
+                    dropdownIconColor="black"
                 >
-                <Picker.Item label="カテゴリ" value="" />
-                <Picker.Item label="ジャケット/アウター" value="outerwear" />
-                <Picker.Item label="トップス" value="tops" />
-                <Picker.Item label="パンツ" value="pants" />
-                <Picker.Item label="スカート" value="skirt" />
-                <Picker.Item label="ワンピース/ドレス" value="onepiece" />
-                <Picker.Item label="その他" value="other" />
+                    {/* 各アイテムに color="black" を明示的に追加 */}
+                    <Picker.Item label="カテゴリを選択" value="" color="#888888" />
+                    <Picker.Item label="ジャケット/アウター" value="outerwear" color="black" />
+                    <Picker.Item label="トップス" value="tops" color="black" />
+                    <Picker.Item label="パンツ" value="pants" color="black" />
+                    <Picker.Item label="スカート" value="skirt" color="black" />
+                    <Picker.Item label="ワンピース/ドレス" value="onepiece" color="black" />
+                    <Picker.Item label="その他" value="other" color="black" />
                 </Picker>
             </View>
             <View style={[styles.editButtonContainer, { width: '50%' }]}>
@@ -401,7 +432,7 @@ const ClosetScreen = () => {
                 <>
                 <View style={styles.logoContainer}>
                     <Image source={require('../images/ClosEt_logo.png')} style={styles.logo} />
-                    <TextInput style={styles.searchInput} placeholder="アイテムを探す" value={searchQuery} onChangeText={setSearchQuery} />
+                    <TextInput style={styles.searchInput} placeholder="アイテムを探す" placeholderTextColor="#888888" value={searchQuery} onChangeText={setSearchQuery} />
                 </View>
                 <View style={styles.divider} />
                 <View style={styles.container}>
@@ -437,163 +468,67 @@ const ClosetScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 10,
+    container: { flex: 1, padding: 10, },
+    logoContainer: { alignItems: 'center', padding: 20, backgroundColor: 'white', },
+    logo: { width: 100, height: 50, },
+    divider: { borderBottomColor: '#ccc', borderBottomWidth: 1, marginBottom: 10, },
+    searchInput: { height: 40, borderColor: 'gray', borderWidth: 1, borderRadius: 5, paddingHorizontal: 10, marginTop: 10, width: '90%', alignItems: 'center', justifyContent: 'center', },
+    iconContainer: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 10, marginRight: 20, },
+    iconButton: { paddingLeft: 15, },
+    imageList: { marginBottom: 20, width: '100%', },
+    itemContainer: { width: (Dimensions.get('window').width - 40) / 3, marginBottom: 10, paddingHorizontal: 5, },
+    image: { width: '100%', aspectRatio: 1, borderRadius: 5, },
+    itemName: { marginTop: 5, fontSize: 12, textAlign: 'center', },
+    categoryTitle: { fontSize: 18, fontWeight: 'bold', marginVertical: 10, },
+    buttonContainer: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        marginTop: 20, 
+        width: '100%', 
     },
-    logoContainer: {
-        alignItems: 'center',
-        padding: 20,
-        backgroundColor: 'white',
+    actionButton: {
+        flex: 1, // 2つのボタンを50%ずつ均等に広げる
     },
-    logo: {
-        width: 100,
-        height: 50,
+    buttonSpacer: { 
+        width: 15, // ボタンとボタンの隙間
     },
-    divider: {
-        borderBottomColor: '#ccc',
-        borderBottomWidth: 1,
-        marginBottom: 10,
+    modalOverlay: { 
+        flex: 1, 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        backgroundColor: 'rgba(0, 0, 0, 0.6)', // 少し暗くしてメリハリを
     },
-    searchInput: {
-        height: 40,
-        borderColor: 'gray',
-        borderWidth: 1,
-        borderRadius: 5,
-        paddingHorizontal: 10,
+    modalContent: { 
+        backgroundColor: 'white', 
+        padding: 24, 
+        borderRadius: 16,     // 角丸を少し大きめにしてモダンに
+        width: '90%',         // 画面幅いっぱいまで使う
+        maxHeight: '80%',     // 縦にはみ出さないように最大高さを指定
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,         // Android用の影
+    },
+    modalOption: { padding: 15, borderBottomWidth: 1, borderBottomColor: '#eee', },
+    modalTitle: { 
+        fontSize: 16, 
+        fontWeight: 'bold', 
+        marginBottom: 12, 
+        color: '#333',
         marginTop: 10,
-        width: '90%',
-        alignItems: 'center',
-        justifyContent: 'center',
     },
-    iconContainer: {
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        marginBottom: 10,
-        marginRight: 20,
-    },
-    iconButton: {
-        paddingLeft: 15,
-    },
-    imageList: {
-        marginBottom: 20,
-        width: '100%',
-    },
-    itemContainer: {
-        width: (Dimensions.get('window').width - 40) / 3,
-        marginBottom: 10,
-        paddingHorizontal: 5,
-    },
-    image: {
-        width: '100%',
-        aspectRatio: 1,
-        borderRadius: 5,
-    },
-    itemName: {
-        marginTop: 5,
-        fontSize: 12,
-        textAlign: 'center',
-    },
-    categoryTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginVertical: 10,
-    },
-    buttonContainer: {
-        width: '60%',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 20,
-        marginLeft: 10,
-    },
-    buttonSpacer: {
-        width: 20,
-    },
-    modalOverlay: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    },
-    modalContent: {
-        backgroundColor: 'white',
-        padding: 20,
-        borderRadius: 10,
-        width: '80%',
-    },
-    modalOption: {
-        padding: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
-    },
-    modalTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
-    checkboxContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-    checkbox: {
-        width: 20,
-        height: 20,
-        borderWidth: 1,
-        borderColor: 'black',
-        marginRight: 10,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    checked: {
-        backgroundColor: 'black',
-    },
-    checkboxLabel: {
-        fontSize: 16,
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 10,
-        position: 'relative',
-        width: '100%',
-    },
-    backButton: {
-        position: 'absolute',
-        left: 10,
-        zIndex: 1,
-        height: '100%',
-        justifyContent: 'center',
-        width: 40,
-    },
-    input: {
-        flex: 1,
-        height: 40,
-        paddingLeft: 50,
-        paddingRight: 10,
-        textAlign: 'center',
-        marginRight: 40,
-    },
-    preview: {
-        aspectRatio: 1,
-        width: '100%',
-        height: undefined,
-        alignSelf: 'center',
-    },
-    label: {
-        fontSize: 16,
-        marginTop: 5,
-    },
-    sliderContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '80%',
-        marginBottom: 20,
-    },
-    slider: {
-        flex: 1,
-        marginHorizontal: 10,
-    },
+    checkboxContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, },
+    checkbox: { width: 20, height: 20, borderWidth: 1, borderColor: 'black', marginRight: 10, justifyContent: 'center', alignItems: 'center', },
+    checked: { backgroundColor: 'black', },
+    checkboxLabel: { fontSize: 16, },
+    inputContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, position: 'relative', width: '100%', },
+    backButton: { position: 'absolute', left: 10, zIndex: 1, height: '100%', justifyContent: 'center', width: 40, },
+    input: { flex: 1, height: 40, paddingLeft: 50, paddingRight: 10, textAlign: 'center', marginRight: 40, },
+    preview: { aspectRatio: 1, width: '100%', height: undefined, alignSelf: 'center', },
+    label: { fontSize: 16, marginTop: 5, },
+    sliderContainer: { flexDirection: 'row', alignItems: 'center', width: '80%', marginBottom: 20, },
+    slider: { flex: 1, marginHorizontal: 10, },
     pickerContainer: {
         ...Platform.select({
             ios: {
@@ -620,20 +555,9 @@ const styles = StyleSheet.create({
             },
         }),
     },
-    editLabel: {
-        fontSize: 16,
-        marginTop: 5,
-    },
-    editSliderContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '80%',
-        marginBottom: 20,
-    },
-    editSlider: {
-        flex: 1,
-        marginHorizontal: 10,
-    },
+    editLabel: { fontSize: 16, marginTop: 5, },
+    editSliderContainer: { flexDirection: 'row', alignItems: 'center', width: '80%', marginBottom: 20, },
+    editSlider: { flex: 1, marginHorizontal: 10, },
     editPickerContainer: {
         ...Platform.select({
             ios: {
@@ -660,23 +584,36 @@ const styles = StyleSheet.create({
             },
         }),
     },
-    editButtonContainer: {
+    editButtonContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%', },
+    editInputContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, position: 'relative', },
+    editContainer: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 20, },
+    chipContainer: {
         flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: '100%',
-    },
-    editInputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexWrap: 'wrap',    // 横幅を超えたら自動で次の行へ折り返す
         marginBottom: 10,
-        position: 'relative',
     },
-    editContainer: {
-        flexGrow: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
+    chip: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 20,    // ピル（丸薬）型にする
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
+        backgroundColor: '#F8F8F8',
+        marginRight: 8,
+        marginBottom: 10,
+    },
+    chipSelected: {
+        backgroundColor: 'black',
+        borderColor: 'black',
+    },
+    chipText: {
+        fontSize: 14,
+        color: '#666',
+        fontWeight: '500',
+    },
+    chipTextSelected: {
+        color: 'white',
+        fontWeight: 'bold',
     },
 });
 

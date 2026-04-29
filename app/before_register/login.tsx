@@ -118,6 +118,7 @@ const Login = ({ navigation }: Props) => {
       <TextInput
         style={[styles.input, emailError ? styles.inputError : null]}
         placeholder="メールアドレス"
+        placeholderTextColor="#888888"
         value={email}
         onChangeText={handleEmailChange}
       />
@@ -126,6 +127,7 @@ const Login = ({ navigation }: Props) => {
         <TextInput
           style={[styles.passwordInput, passwordError ? styles.inputError : null]}
           placeholder="パスワード"
+          placeholderTextColor="#888888"
           secureTextEntry={!showPassword}
           value={password}
           onChangeText={handlePasswordChange}
